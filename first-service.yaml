@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+#  unique key of the Service instance
+  name: ko-first-svc
+
+spec:
+#  defines which pods are represented by this Service
+#  the Service becomes a network endpoint for other services or external users (eg.browser)
+#  selector labels must match kvp with pod.yaml definition
+  selector:
+    app: ko-first-pod
+  ports:
+    - name: http
+      port: 80
+      nodePort: 30080
+#  ClusterIP - accessible from only inside the cluster, not via web browser
+#  LoadBalancer - will need an existing LB (use an Ingress resource)
+#  NodePort - expose service using a Node, must use # > 30k
+  type: NodePort
+

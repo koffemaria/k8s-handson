@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ko-first-pod
+  labels:
+    app: ko-first-pod
+spec:
+  containers:
+  - name: ko-first-pod
+    image: richardchesterwood/k8s-fleetman-webapp-angular:release0
