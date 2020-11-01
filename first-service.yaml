@@ -3,14 +3,12 @@ kind: Service
 metadata:
 #  unique key of the Service instance
   name: webapp-service
-
 spec:
 #  defines which pods are represented by this Service
 #  the Service becomes a network endpoint for other services or external users (eg.browser)
-#  selector labels must match kvp with pod.yaml definition
+#  selector labels must match kvp with pod.yaml definition; eg. prod vs dev selector
   selector:
     app: webapp
-    release: "0-5"
   ports:
     - name: http
       port: 80

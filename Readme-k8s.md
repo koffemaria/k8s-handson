@@ -37,4 +37,12 @@ kubectl exec -it <pod-name> -- /bin/bash
 minikube svc <service-name> --url
 ```
 
-
+### ReplicaSets
+- used to wrap pod in order to automatically restart a failed pod
+- writing a replicaset yaml also includes the pod yaml definition
+- running a `kubectl describe` on your rs will see a log of everytime it spins up the pod
+- there will be a short downtime between crashed pod and rs recreating the pod
+- architecture question: does it make sense for your app to have multiple rs for each microservice? 
+```bash
+kubectl describe rs webapp-replicaset
+```

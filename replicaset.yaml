@@ -1,0 +1,19 @@
+# this replicaset will replace entire first-pod.yaml
+
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: webapp-replicaset
+spec:
+  replicas: 2
+  selector: # use selector to decide which pod definition is part of replicaset
+    matchLabels:
+      app: webapp
+  template: #template for pods
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release0-5
