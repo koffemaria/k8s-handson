@@ -2,14 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
 #  unique key of the Service instance
-  name: ko-first-svc
+  name: webapp-service
 
 spec:
 #  defines which pods are represented by this Service
 #  the Service becomes a network endpoint for other services or external users (eg.browser)
 #  selector labels must match kvp with pod.yaml definition
   selector:
-    app: ko-first-pod
+    app: webapp
+    release: "0-5"
   ports:
     - name: http
       port: 80
@@ -18,4 +19,18 @@ spec:
 #  LoadBalancer - will need an existing LB (use an Ingress resource)
 #  NodePort - expose service using a Node, must use # > 30k
   type: NodePort
+
+
+#metadata:
+#  name: cleanslate
+#spec:
+#  ports:
+#  - port: 80
+#    protocol: TCP
+#    targetPort: 8000
+#    name: http
+#  selector:
+#    app: cleanslate
+#  sessionAffinity: None
+#  type: NodePort
 
