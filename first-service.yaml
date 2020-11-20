@@ -2,11 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
 #  unique key of the Service instance
+#  name label will be added to the k8s DNS; what will be used in any network/webserver calls
   name: webapp-service
 spec:
 #  defines which pods are represented by this Service
 #  the Service becomes a network endpoint for other services or external users (eg.browser)
 #  selector labels must match kvp with pod.yaml definition; eg. prod vs dev selector
+#  app label - applies to Deployment template -> metadata -> labels -> app
   selector:
     app: webapp
   ports:
@@ -15,7 +17,7 @@ spec:
       nodePort: 30080
 #  ClusterIP - accessible from only inside the cluster, not via web browser
 #  LoadBalancer - will need an existing LB (use an Ingress resource)
-#  NodePort - expose service using a Node, must use # > 30k
+#  NodePort - expose service using a Node, must use # > 30k; exposed to outside world
   type: NodePort
 
 

@@ -34,7 +34,7 @@ kubectl exec -it <pod-name> -- /bin/bash
 - if using Desktop Docker, you will have to "tunnel", and keep it running in background
 -follow URL: `http://127.0.0.1:53423`
 ```bash
-minikube svc <service-name> --url
+minikube service <service-name> --url
 ```
 
 ### ReplicaSets
@@ -72,3 +72,21 @@ kubectl rollout undo deploy <deploy-name> --to-revision=2
 ```bash
 kubectl get all -n kube-system
 ```
+
+### Microservices
+-  Microservices best practice principles: 
+    - highly cohesive - each microservice should be handling 1 req or should have single set of responsibilities
+    - loose coupling - less dependencies between each application
+- **fleetman-queue** service
+    - user: admin ; pw: admin
+- **fleetman-position-tracker** service 
+    - append to tunnel url `~/vehicles/City%20Truck`
+    
+### Ingress Controllers
+- Application Load Balancers
+    - used to configure routing rules
+    - if incoming domain name has a particular pattern, then route to a particular DNS service
+- Ingress Controllers 
+    - Service that makes routing decisions based on domain name request by end user, 
+        it will point to a configured Service
+    - avoids multiple ALB for each Service you have
