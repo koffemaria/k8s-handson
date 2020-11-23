@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: queue
+        image: mongo:3.6.5-jessie
+        # specify one dir in the container needs to map to a dir outside the container
+        # provide vol configs for the host system to store the dir outside container
+        volumeMounts:
+          - name: mongo-persistent-storage
+            mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          # instead of hostPath, use pointer to the config of HOW we want the mount to be implemented
+          persistentVolumeClaim:
+            # this will claim storage from somewhere but not configured here
+            claimName: mongo-pvc
+#          hostPath:
+#            path: /mnt/kevins/dir/
+#            type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - name: mongoport
+      port: 27017
+  type: ClusterIP

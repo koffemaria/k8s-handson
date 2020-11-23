@@ -11,7 +11,7 @@ spec:
   template: #template for pods
     metadata:
       labels:
-        app: webapp
+        app: webapp # this will match with the Service (spec-selector-app: value)
     spec:
       containers:
       - name: webapp

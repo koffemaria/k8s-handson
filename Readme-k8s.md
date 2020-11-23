@@ -81,6 +81,36 @@ kubectl get all -n kube-system
     - user: admin ; pw: admin
 - **fleetman-position-tracker** service 
     - append to tunnel url `~/vehicles/City%20Truck`
+
+
+### Persistence
+- When a pod is destroyed, all data contained is lost
+- able to store data in a Persistent volume 
+    - eg. file stored in host system, or hard drive in cloud env (eg. AWS EBS or "HD on the cloud")
+- Deployment **position-tracker**
+    - position data stored in memory (Springboot)
+    - issue #1 - it will run out of RAM eventually
+        - solution - use an external db like mongo to store data
+    - issue #2 - data is stored in mongodb container, if pod dies so will container and all data is lost
+        - solution - use a [Persistent Volume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistent-volumes) 
+            to mount to store data in local host system (hostPath)
+- **Mount** a dir - store data from a container to a dir in host system (local); data for that dir is stored outside the container
+- [**hostPath**](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath) 
+    - represents a pre-existing file/dir on the host machine that is exposed to the container
+    - useful for local dev working before moving to cloud platform
+    - more [types of PV](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#types-of-persistent-volumes)
+- **Binding** 
+    - at runtime, PVC will be satisfied with PV by matching *storageClassName* 
+    - mongodb pod will bind with this
+
+```bash
+kubectl get pv
+# NAME=local-storage; STATUS=Bound; CLAIM=mongo-pvc
+
+kubectl get pvc
+# NAME=mongo-pvc; STATUS=Bound; VOLUME=local-storage
+```
+
     
 ### Ingress Controllers
 - Application Load Balancers
