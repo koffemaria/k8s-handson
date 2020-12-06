@@ -111,6 +111,50 @@ kubectl get pvc
 # NAME=mongo-pvc; STATUS=Bound; VOLUME=local-storage
 ```
 
+
+### Running in AWS
+- Node
+    - physical local server in the system; eg. VM/Docker for minikube
+    - uses several nodes in the server in cloud; eg. AWS EC2 instance
+    - Worker Node's job is to run the k8s pods 
+    - W. Nodes can be designed to be failure-resilient
+- Master Node 
+    - manages scheduling of lower nodes
+    - if using multiple worker nodes, a ReplicaSet can be deployed by master node in another surviving wNode
+    - `kubectl` cmds will be run on M Node
+    - EKS - AWS will run the mNode; AWS will spin up a new mNode whenever it crashes
+        - integrates with Fargate - allows to run containers with "no servers"
+
+### AWS EKS setup
+- setup ec2 instance; ssh into ec2 instance
+- ip address found in AWS EC2 UI, under *IPv4 Public IP*
+- AWS setup steps
+    1. setup EC2 instance
+    2. ssh into instance to install `aws` && `eksctl` && `kubectl`
+        - ensure kubectl and eks versions match
+    3. setup IAM group and user roles/perms; create custom policy if needed
+    4. create cluster using eksctl cmd
+        - *will incur ongoing costs!*
+        - creating takes ~20 mins
+        - check eks clusters & ec2 nodes instances in AWS UI
+    5. ensure to delete cluster when done
+```bash
+ssh -i bootstrap-dev-ko.pem ec2-user@3.86.221.248
+aws eks list-clusters
+eksctl create cluster --name my-first-cluster --nodes-min=3
+kubectl get all
+```
+
+### AWS EKS operations
+- everything in this section is done **within EKS instance**
+- deploy `workloads.yaml` to cluster
+- mount new volume to store mongo data
+```bash
+# inside ec2 instance
+eksctl validate cluster
+nano storage-aws.yaml
+```
+
     
 ### Ingress Controllers
 - Application Load Balancers
