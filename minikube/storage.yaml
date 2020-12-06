@@ -5,13 +5,17 @@ metadata:
   name: mongo-pvc
 spec:
   storageClassName: mylocalstorage
+  # required; r/w vol mounted in a single node
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
+      # defined as part of biz reqs
       storage: 20Gi
 
 ---
+# answers "how do we want it implemented" for k8s admin
+# define type of PV - eg. hostPath, EBS, Azure, etc...
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -19,10 +23,10 @@ metadata:
 spec:
   storageClassName: mylocalstorage
   capacity:
+    # physical storage in k8s cluster; PV storage amt must be >= than PVC
     storage: 20Gi
   accessModes:
     - ReadWriteOnce
   hostPath:
-    # mod to
     path: "/mnt/kevins/dir/"
     type: DirectoryOrCreate

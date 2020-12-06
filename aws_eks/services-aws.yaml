@@ -8,10 +8,9 @@ spec:
   ports:
     - name: http
       port: 8161
-      nodePort: 30010
     - name: endpoint
       port: 61616
-  type: NodePort
+  type: ClusterIP
 
 ---
 apiVersion: v1
@@ -50,6 +49,5 @@ spec:
   ports:
     - name: http
       port: 80
-      nodePort: 30080
-  # use NodePort only for local or testing purpose
-  type: NodePort
+  # can only be used in cloud env that supports LBs
+  type: LoadBalancer

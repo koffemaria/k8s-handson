@@ -138,6 +138,7 @@ kubectl get pvc
         - creating takes ~20 mins
         - check eks clusters & ec2 nodes instances in AWS UI
     5. ensure to delete cluster when done
+
 ```bash
 ssh -i bootstrap-dev-ko.pem ec2-user@3.86.221.248
 aws eks list-clusters
@@ -149,10 +150,31 @@ kubectl get all
 - everything in this section is done **within EKS instance**
 - deploy `workloads.yaml` to cluster
 - mount new volume to store mongo data
+    - use `StorageClass` for EBS storage - only used by aws when needed
+- AWS UI - notice...
+    - new EKS cluster
+    - EC2 Volumes w/ 3 new nodes
+    - EC2 LoadBalancer - find DNS name and paste in browser url
+- Route 53 - AWS DNS service; create record eg. k8s-tutorial-ko.2u.com
+- Node failure - if you want web ui without downtime
+    - increase **replicaSet** from `1` -> `2`
+    - ensure pod/app is **stateless** or does not contain data
+    - `queue` and `mongo` pods are **stateful**
+- AWS MQ
+    - config MQ instance, then re-engineer code to MQ
+    - aka. shift responsibility of stateful pods to 3rd party
+    - 
 ```bash
-# inside ec2 instance
-eksctl validate cluster
+# inside ec2 instance; via ssh
+eksctl get cluster
 nano storage-aws.yaml
+# cmd-o to write, then cmd-x
+kubectl apply -f storage-aws.yaml
+kubectl get pvc
+kubectl get pv
+
+# how to know which node your pod is currently running on?
+kubectl get pods -o wide
 ```
 
     
