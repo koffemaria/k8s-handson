@@ -32,6 +32,7 @@ kubectl exec -it <pod-name> -- /bin/bash
 - used as a bridge by the pod to connect to the outside world
 - use `app` label as a kvp to connect to a pod
 - if using Desktop Docker, you will have to "tunnel", and keep it running in background
+- type of `ClusterIP` - can only make calls within cluster, nothing else
 -follow URL: `http://127.0.0.1:53423`
 ```bash
 minikube service <service-name> --url
@@ -173,6 +174,8 @@ kubectl get all
         - to restart, run cmd `eksctl create cluster ...`
     -EKS UI
         - check Clusters are deleted
+- fleetman-webapp UI
+    - use loadbalancer url: eg. `http://a081ea3501c0f4a58918c0989781e3dd-2008835085.us-east-1.elb.amazonaws.com`
 ```bash
 # inside ec2 instance; via ssh
 eksctl get cluster
@@ -217,7 +220,40 @@ kubectl get all -n kube-system
 ```
 
 ### Monitoring
-- test
+- AWS comes with basic free monitoring of EC2 instances/nodes
+- Prometheus - external monitoring
+    - gather metrics from a source (cluster)
+    - integrate with Grafana dashboards
+- Helm - package manager for k8s
+- more K8s resources
+    - CustomResourceDefinition - extend k8s to add further objects defined in yaml
+- k8s ops
+    - must apply **crds.yaml** first before **eks-monitoring.yaml**
+    - Prom: edit **type** of svc `monitoring-kube-prometheus-prometheus` from ClusterIP -> LoadBalancer
+        - Prometheus UI: go to url of LB+9090 TCP/IP (eg. `http://1234-2008835085.us-east-1.elb.amazonaws.com:9090`)
+        - *WARNING* - will incur costs; change back to ClusterIP && delete `nodePort`
+    - Grafana: edit **type** of svc `monitoring-grafana` from ClusterIP -> LoadBalancer 
+- some important metrics
+    - `node_load15` - Prometheus constantly sampling nodes/workers for CPU usage or load
+    - `node_load1` - load over last 1 min
+    - `node_load5` - load over last 5 min
+    - USE Method
+        - *U*tilization - how much is resource being used on avg?
+        - *S*aturation - how much is resource being overloaded or unable to handle?
+        - *E*rrors - how many errors?
+```bash
+kubectl apply -f crds.yaml
+kubectl apply -f eks-monitoring.yaml
+
+# 10 new monitoring pods added
+kubectl get pods -n monitoring
+
+# 8 new services added
+kubectl get svc -n monitoring
+
+# edit type: ClusterIP -> LoadBalancer
+kubectl edit svc monitoring-kube-prometheus-prometheus -n monitoring
+```
 
 ### Ingress Controllers
 - Application Load Balancers
