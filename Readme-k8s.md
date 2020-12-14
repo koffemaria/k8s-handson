@@ -163,7 +163,16 @@ kubectl get all
 - AWS MQ
     - config MQ instance, then re-engineer code to MQ
     - aka. shift responsibility of stateful pods to 3rd party
-    - 
+- Delete AWS resources
+    - delete cluster from shell; takes ~5 mins
+    - EC2 UI
+        - check LBs && Instances are deleted
+        - delete `k8s-dynamic-pvc` volume;
+        - delete EBS `Bootstrap` volume; will incur small costs
+        - `stop` bootstrap instance - keeps all k8s resources
+        - to restart, run cmd `eksctl create cluster ...`
+    -EKS UI
+        - check Clusters are deleted
 ```bash
 # inside ec2 instance; via ssh
 eksctl get cluster
@@ -175,9 +184,41 @@ kubectl get pv
 
 # how to know which node your pod is currently running on?
 kubectl get pods -o wide
+
+# to delete cluster
+eksctl delete cluster k8s-tutorial-ko
 ```
 
-    
+### Logging
+- ELK or ElasticStack
+    - distributed logging between multiple containers in single node
+    - use multiple software components
+        1. *E*lastic search - distributed search and analytics engine, store in db and query using REST API
+        2. *L*og container installed in node to gather all logs (eg. Logstash or Fluentd)
+        3. *K*ibana - visualize elastic search data
+- Architecture
+    - **Fluentd** installed in each node
+    - **Kibana** and **Elastic search** can be installed on any node or instance
+    - ES use >1 replicaSet
+    - Kibana - webapp
+    - deployed in `kube-system` ns
+- `fluentD-config.yaml`
+    - determines how logs files should be processed
+- `elastic-stack.yaml`
+    - DaemonSet 
+        - similar to replicaSet, but doesnt need to specify #; it will run in all nodes
+        - ref to FluentD docker image
+    - StatefulSet
+        - pods created will have set name (metadata-name)
+        - `VolumeClaimTemplates` - stores in temp dir
+- to simulate app failure - mod to `replicas: 0` for Deployment **queue**
+```bash
+kubectl get all -n kube-system
+```
+
+### Monitoring
+- test
+
 ### Ingress Controllers
 - Application Load Balancers
     - used to configure routing rules
