@@ -309,6 +309,28 @@ kubectl describe node <my-node-name>
 
 ```
 
+### Replication & Autoscaling
+- Horizontal pod autoscaling - adding more nodes to cluster
+- Vertical pod scaling - increase cpu power of nodes
+- use cpu requests to trigger horizontal autoscaling - use horizontal pod autoscaler (HPA)
+    - rule: if actual cpu usage of pod x exceeds > 50% on avg of cpu requests (this metric is determined using metric server)
+    - must setup individual rules for each deployment
+- `--cpu-percentage` 
+    - % amt that triggers the autoscale, can be > 100%
+    - % is relative to the request
+    - eg. if cpu = 50m, and avg is > 25m, then autoscale triggers
+- `--min` and `--max`
+    - min and max of autoscaled nodes
+```bash
+# if minikube, ensure metrics-saver is enabled
+minikube addons list
+minikube addons enable metrics-saver
+
+# create autoscale
+kubectl autoscale deployment api-gateway --cpu-percent 400 --min 1 --max 4
+kubectl get hpa
+```
+
 ### Ingress Controllers
 - Application Load Balancers
     - used to configure routing rules
