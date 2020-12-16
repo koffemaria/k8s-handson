@@ -241,6 +241,14 @@ kubectl get all -n kube-system
         - *U*tilization - how much is resource being used on avg?
         - *S*aturation - how much is resource being overloaded or unable to handle?
         - *E*rrors - how many errors?
+- Bonus: how to access a live EKS cluster without using a LoadBalancer?
+    - NodePort FAQs:
+        1. How do we know which particular Node the pod is running on? 
+            - k8s built-in Proxy service redirects traffic to active node to handle request
+            - if a node crashes, a new one spins up with a completely different IP address
+        2. What to do about security?
+            - EKS cluster uses **Security Groups**, which limits incoming traffic to a node by specific ports
+            - can be modified in AWS EC2 UI
 ```bash
 kubectl apply -f crds.yaml
 kubectl apply -f eks-monitoring.yaml
@@ -253,6 +261,52 @@ kubectl get svc -n monitoring
 
 # edit type: ClusterIP -> LoadBalancer
 kubectl edit svc monitoring-kube-prometheus-prometheus -n monitoring
+```
+
+### Requests & Limits
+- Requests can be memory request or cpu request
+- Limits
+    - goal of Limits are to protect overall health of a cluster by **limiting** its resources
+    - acts as a safety net
+    - Memory
+        - if actual Memory usage of the container at runtime exceeds the specified limit, the container will be killed.
+        - the Pod will remain and the container will be restarted
+    - CPU
+        - if actual CPU usage of the container at runtime exceeds the specified limit, the CPU is throttled
+        - the container will continue to run 
+- Requests
+    - Memory
+        - inserted within `containers` definition
+        - `memory` does not affect pod runtime; merely allocating how much RAM is used from the Node
+    - CPU
+        - inserted within `containers` definition
+        - 1 CPU = 1 AWS virtual CPU
+        - allocate this much CPU to the container, but not necessarily use all of it
+- Node details
+    - Capacity - check total `memory` of host machine's RAM
+    - Allocatable - 
+```yaml
+#sample Deployment.yaml
+kind: Deployment
+...
+spec:
+  template:
+    spec:
+      containers:
+        - name: my-container
+          image: $(REPO)/$(IMAGE):$(TAG)
+          resources:
+            requests:
+              memory: 300Mi # 1Mi = 1024Ki; 1Ki = 1024 bytes 
+              cpu: 100m # 100m = 1/10 of a cpu
+            limits:
+              memory: 500Mi
+              cpu: 200m
+```
+```bash
+kubectl get nodes
+kubectl describe node <my-node-name>
+
 ```
 
 ### Ingress Controllers

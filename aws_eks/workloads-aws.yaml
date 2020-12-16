@@ -15,6 +15,13 @@ spec:
       containers:
       - name: queue
         image: richardchesterwood/k8s-fleetman-queue:release2
+          resources:
+            requests:
+              memory: 300Mi
+              cpu: 100m
+            limits:
+              memory: 500mi
+              cpi: 500m
 
 ---
 apiVersion: apps/v1
