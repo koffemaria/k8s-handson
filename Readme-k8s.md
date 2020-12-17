@@ -339,3 +339,37 @@ kubectl get hpa
     - Service that makes routing decisions based on domain name request by end user, 
         it will point to a configured Service
     - avoids multiple ALB for each Service you have
+- create SHA1 pawssword using an online **Htpasswd Generator**; create secret from it
+- K8s [nginx basic-auth secret](https://kubernetes.github.io/ingress-nginx/examples/auth/basic/#basic-authentication)
+- AWS
+    - download [NLB AWS installation](https://kubernetes.github.io/ingress-nginx/deploy/#aws) and apply to cluster
+    - after installation, check `Loadbalancers` in EC2 UI
+    - ensure switch service type `LoadBalancer` -> `ClusterIP` for **fleetman-webapp**
+    - edit local `/etc/hosts` and add IP and domain
+        - alternatively, you can use AWS Route53 to create a DNS to link directly to your ALB
+- Yaml files created/mod and applied:
+    - ingress-secure-aws.yaml
+    - ingress-public-aws.yaml
+    - fleetman-secrets.yaml
+    - services-aws.yaml
+    
+```bash
+# create a basic-auth Secret
+kubectl create secret generic my-secret-name --from-file auth
+
+# check annotations on your ingress
+kubectl describe ingress secure-ingress -o yaml
+
+# download and apply AWS NLB installation
+wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.41.2/deploy/static/provider/aws/deploy.yaml
+kubectl apply -f deploy.yaml
+
+# check new ingress-controller created; EC2 UI should show too
+kubectl get all -n ingress-nginx
+
+# test new ingress-nginx loadbalancer
+kubectl get svc -n ingress-nginx
+nslookup aad80c995338f47c9bb8340c8372b4a2-f83e88ffef150571.elb.us-east-1.amazonaws.com
+# get IP address under Non-authoritative answer: 34.205.149.250
+# add IP and url to /etc/hosts
+``` 

@@ -1,0 +1,19 @@
+#apiVersion: networking.k8s.io/v1beta1
+#basic auth required to login in to admin page
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: secure-routing
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: fleetman-secrets
+    nginx.ingress.kubernetes.io/auth-realm: "wrong password!"
+spec:
+  rules:
+    - host: kosubdomain.koingress.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: fleetman-queue
+              servicePort: 8161

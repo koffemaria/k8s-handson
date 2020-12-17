@@ -50,4 +50,6 @@ spec:
     - name: http
       port: 80
   # can only be used in cloud env that supports LBs
-  type: LoadBalancer
+  # type: LoadBalancer
+  # after ingress-nginx loadbalancer is applied use ClusterIP
+  type: ClusterIP
