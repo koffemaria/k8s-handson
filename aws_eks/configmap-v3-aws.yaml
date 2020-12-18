@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: global-database-config-v3
+  namespace: default
+data:
+  database.properties: |
+    database.url=http://my-db-url.newer_change.com
+    database.password=password

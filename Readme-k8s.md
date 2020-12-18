@@ -331,6 +331,20 @@ kubectl autoscale deployment api-gateway --cpu-percent 400 --min 1 --max 4
 kubectl get hpa
 ```
 
+### Readiness and Liveness Probes
+- Problem 
+    - your pod might be in a "running" state, but your application inside is still starting up and not able to receive Requests.
+    - Requests can timeout, causes instability and a downtime appearance for users
+- Solution 1 - Readiness Probe
+    - add k8s config to **Deployment.yaml** to test if a pod is ready to receive Requests
+        - add `readinessProbe` under `containers` for **api-gateway**
+    - K8s will not send requests to the pod until it is ready to receive Requests
+- Solution 2 - Liveness Probe
+    - similar to Readiness Probe, but will continue to run for the duration for the pod's lifetime
+    - if LP fails, k8s will kill and restart the pod
+- Files modified
+    - workload-aws.yaml
+
 ### Ingress Controllers
 - Application Load Balancers
     - used to configure routing rules
@@ -373,3 +387,25 @@ nslookup aad80c995338f47c9bb8340c8372b4a2-f83e88ffef150571.elb.us-east-1.amazona
 # get IP address under Non-authoritative answer: 34.205.149.250
 # add IP and url to /etc/hosts
 ``` 
+
+### ConfigMaps and Secrets
+- ConfigMap
+    - object used to store non-confidential data in key-value pairs that can be shared across multiple pods
+    - allows setting env variables, cli args, for config files in a volume
+    - pod does not do rolling updates when a new env var set on CM, until pod is killed/restarted
+- 3 ways to reference CM in deployment
+    1. `env` -> `valueFrom`
+    2. `envFrom` - cleaner code
+    3. `volumeMount` - all values on configMap is available as separate files in a specified dir within the pod
+        - creates database properties file
+- Secrets
+    - object used to store sensitive info; usually encoded in BASE64 
+    
+```bash
+kubecetl get cm 
+kubectl describe cm global-database-config -o yaml
+
+# manually check by ssh into pod
+kubectl exec -it position-simulator -- /bin/bash
+echo $DATABASE_URL
+```

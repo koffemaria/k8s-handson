@@ -42,8 +42,32 @@ spec:
       - name: position-simulator
         image: richardchesterwood/k8s-fleetman-position-simulator:release2
         env:
-          - name: SPRING_PROFILES_ACTIVE
-            value: production-microservice
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+# option 1: call cm using valueFrom; have to do for each env var
+#        - name: DATABASE_URL
+#          valueFrom:
+#            configMapKeyRef:
+#              name: global-database-config-v1
+#              key: database.url
+#        - name: DATABASE_PASSWORD
+#          valueFrom:
+#            configMapKeyRef:
+#              name: global-database-config-v1
+#              key: database.password
+# option 2: use envFrom key; must use proper env var syntax
+#        envFrom:
+#        - configMapRef:
+#            name: global-database-config-v2
+# option 3: use volumeMount
+        volumeMount:
+          - name: database-config-volume
+            mountPath: /etc/any/directory/config
+      volumes:
+        - name: database-config-volume
+          configMap:
+            name: global-database-config-v3
+
 
 ---
 apiVersion: apps/v1
@@ -85,6 +109,11 @@ spec:
       containers:
       - name: api-gateway
         image: richardchesterwood/k8s-fleetman-api-gateway:release2
+        readinessProbe:
+          # will only work if image has a webserver; img should tell you what port is exposed
+          httpGet:
+            path: /
+            port: 8080
         env:
           - name: SPRING_PROFILES_ACTIVE
             value: production-microservice
