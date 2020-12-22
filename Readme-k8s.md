@@ -366,7 +366,6 @@ kubectl get hpa
     - ingress-public-aws.yaml
     - fleetman-secrets.yaml
     - services-aws.yaml
-    
 ```bash
 # create a basic-auth Secret
 kubectl create secret generic my-secret-name --from-file auth
@@ -400,7 +399,6 @@ nslookup aad80c995338f47c9bb8340c8372b4a2-f83e88ffef150571.elb.us-east-1.amazona
         - creates database properties file
 - Secrets
     - object used to store sensitive info; usually encoded in BASE64 
-    
 ```bash
 kubecetl get cm 
 kubectl describe cm global-database-config -o yaml
@@ -409,3 +407,42 @@ kubectl describe cm global-database-config -o yaml
 kubectl exec -it position-simulator -- /bin/bash
 echo $DATABASE_URL
 ```
+
+### Other Workload Types
+- Jobs
+    - purpose: avoid unpredictable problems such as node failure
+    - creates a pod, k8s will ensure pod will successfully run to completion
+    - pod spec `restartPolicy` is defaulted to `Always`; other options: `OnFailure` or `Never`
+    - see sample [jobs.yaml](minikube/jobs.yaml)
+- Cron Jobs
+    - purpose: schedule pods to execute on a specific timeframe, using crontab expressions
+    - sample [cron-jobs.yaml](minikube/cron-job.yaml)
+- DaemonSets
+    - purpose: ensures all nodes run a copy of the pod
+    - eg. if 3 nodes, there will be 3 instances of the pod
+    - sample [daemonset.yaml](minikube/daemonset.yaml)
+```bash
+# to watch active running pod logs
+kubectl apply -f jobs.yaml
+watch kubectl get po 
+```
+
+### StatefulSets
+- generally, use ["cattle, not pets" model](https://devops.stackexchange.com/questions/653/what-is-the-definition-of-cattle-not-pets) 90% of the time.
+    - aka. **PetSet** in k8s
+- pods will have a known predictable name rather than a given uuid 
+    - eg. Pod-gateway1 vs Pod-fg62k-11497
+- pods will always start in sequence
+- pods can be specifically addressed by clients using the known name
+- k8s **Headless Service** is used to route to the specific pod called by client 
+- not used for persistence (for data to live longer than a pod's lifetime)
+- use case: replicating a database
+    - goal: 1 db instance with data shared across 3 pods
+    - db's cant usually be replicated by simple ReplicaSets or Deployments
+        - eg. deploying [mongo-stack-aws.yaml](aws_eks/mongo-stack-aws.yaml) with `replicas: 3`
+        will produce 3 independent mongodb's
+    - use multiple StatefulSets with **Pod-db1** acting as the primary used for R/W
+    - Pod-db1 will then replicate its data to **Pod-db2** & **Pod-db3**
+    - use Headless Service to route to Pod-db1
+    - client will use db url with all Pod-db's in a comma separated list
+        - eg. http://mongodb-0.db,mongodb-1.db,mongodb-2.db

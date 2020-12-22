@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Daemonset #very similar to a Deployment
+metadata:
+  name: webapp
+spec:
+#  replicas: 2 #dont need replicas
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: richardchesterwood/k8s-fleetman-webapp-angular:release2
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: production-microservice
